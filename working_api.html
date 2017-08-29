@@ -36,7 +36,7 @@
   <script type="text/javascript">
     //array of tv shows called topics
     var topics=[$("#tomjerry").text(),$("#tmnt").text(),$("#djosh").text()];
-    //when buttons of class show are clicked 
+    //happens when buttons of class show are clicked 
     $(".show").on("click", function() {
       //get the attribute of data-tvshow and put it in the queryURL
       var myshow = $(this).attr("data-tvshow");
@@ -58,6 +58,7 @@
           var showDiv=$("<div>");
           var p=$("<p>").text("Rating: "+results[i].rating);
           var showImage=$("<img>");
+          //sets the src attribute to the still image url
           showImage.attr("src",results[i].images.fixed_height_still.url);
           //set the data-state to still
           showImage.attr("data-state","still");
@@ -93,8 +94,8 @@
           var a = $("<button>");
           // Adding a class of show to our button
           a.addClass("show");
-          // Adding a data-attribute called data-animal
-          a.attr("data-animal", topics[i]);
+          // Adding a data-attribute called data-tvshow
+          a.attr("data-tvshow", topics[i]);
           // Providing the initial button text
           a.text(topics[i]);
           // Adding the button to the buttons-appear-here div
@@ -109,19 +110,17 @@
         var topic = $("#ShowText").val().trim();
         // Adding tv show from the textbox to our array
         topics.push(topic);
-
         // Calling renderButtons which handles the processing of our topics array
         var t=$("<button>");
         t.addClass("showy");
-        t.attr("data-animal",topic);
+        t.attr("data-tvshow",topic);
         t.text(topic);
-        $("#buttons-appear-here").append(t);
-        
+        $("#buttons-appear-here").append(t); 
       });
 //////Shows the info such as the rating of each gif for this specific tv show///////////////////////////////////////////////////////////////////
       function DisplayMoreInfo()
       {
-        var topico = $(this).attr("data-animal");
+        var topico = $(this).attr("data-tvshow");
         var queryURLer = "http://api.giphy.com/v1/gifs/search?q=" +
         topico + "&api_key=dc6zaTOxFJmzC&limit=10";
         $.ajax({
@@ -135,7 +134,6 @@
             var laDiv=$("<div>");
             var p=$("<p>").text("Rating: "+laresults[i].rating);
             var laImage=$("<img>");
-            //laImage.addClass("new-im");
             laImage.attr("src",laresults[i].images.fixed_height_still.url);
             laImage.attr("data-still",laresults[i].images.fixed_height_still.url);
             laImage.attr("data-animate",laresults[i].images.fixed_height.url);
@@ -153,8 +151,8 @@
 
       //function for animating and pausing the giffy images
       $(document).on("click", ".new-im", function(){
-          var hey1 = $(this).attr("data-state"); //stores the 
-          var state = $(this).attr("src");
+          var hey1 = $(this).attr("data-state"); //gets and stores the data-state for a gif  
+          var state = $(this).attr("src"); //stores the src attribute in a variable called state
           // If the clicked image's state is still, update its src attribute to what its data-animate value is.
           // Then, set the image's data-state to animate
           // Else set src to the data-still value
@@ -168,7 +166,6 @@
             $(this).attr("src",$(this).attr("data-still"));
             $(this).attr("data-state","still");
           }
-
       });
   </script>
 </body>
