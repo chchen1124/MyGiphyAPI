@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Animal Buttons</title>
+  <style type="text/css">
+    button,label,input{
+      margin: 5px;
+    }
+    form{
+      margin-top:255px;
+      margin-left:325px; 
+    }
+  </style>
+</head>
+
+<body>
+  <!--manually generated three buttons of class show-->
+  <button class="show" id="fguy" data-tvshow="familyguy">Family Guy</button>
+  <button class="show" id="tmnt" data-tvshow="tmnt">Teenage Mutant Ninja Turtles</button>
+  <button class="show" id="djosh" data-tvshow="drakeandjosh">Drake and Josh</button>
+  <!--place where new buttons are to be added-->
+  <div id="buttons-appear-here">
+  </div>
+  <!--place where the giffy images are to appear-->  
+  <div id="gifs-appear-here">
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!--form where a text box is there for the user to enter in a tv show and button is also there for the user to add a new button for that specified tv show-->
+  <form>
+    <label for="ShowText">Please enter in a show</label>
+    <input type="text" id="ShowText"></input>
+    <input id="add-show" type="submit" value="Show">
+  </form>  
+  <script type="text/javascript">
+    //array of tv shows called topics
+    var topics=[$("#tomjerry").text(),$("#tmnt").text(),$("#djosh").text()];
+    //when buttons of class show are clicked 
+    $(".show").on("click", function() {
+      //get the attribute of data-tvshow and put it in the queryURL
+      var myshow = $(this).attr("data-tvshow");
+      var queryURL = "http://api.giphy.com/v1/gifs/search?q=" +
+        myshow + "&api_key=dc6zaTOxFJmzC&limit=10";
+
+      //ajax call will get the results from the response that has been gotten back from the server side
+      $.ajax({
+        url: queryURL,
+        method: "GET"
+      }).done(function(response) {
+
+         console.log(response);
+         var results=response.data;
+         //loop through the results (which are the gifs) and display their ratings, also set the src attributes for each image to the still image url
+         for (var i = 0; i < results.length; i++) 
+         {
+          console.log(results[i]);
+          var showDiv=$("<div>");
+          var p=$("<p>").text("Rating: "+results[i].rating);
+          var showImage=$("<img>");
+          showImage.attr("src",results[i].images.fixed_height_still.url);
+          //set the data-state to still
+          showImage.attr("data-state","still");
+          //set the data-still attribute to the still image url
+          showImage.attr("data-still",results[i].images.fixed_height_still.url);
+          //set the data-animate attribute to the animated image url
+          showImage.attr("data-animate",results[i].images.fixed_height.url);
+          //add new class called new-im
+          showImage.addClass("new-im");
+          showDiv.append(p);
+          showDiv.append(showImage);
+          $("#gifs-appear-here").prepend(showDiv);
+        // ==================================
+         }
+
+      });
+
+    });
+//}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // Function for creating the buttons
+      function renderButtons() {
+
+        // Deleting the tv shows prior to adding new tv shows
+        // (this is necessary otherwise you will have repeat buttons)
+        $("#buttons-appear-here").empty();
+
+        // Looping through the array of tv shows
+        for (var i = 0; i < topics.length; i++) {
+
+          // Then dynamicaly generating buttons for each show in the array
+          // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
+          var a = $("<button>");
+          // Adding a class of show to our button
+          a.addClass("show");
+          // Adding a data-attribute called data-animal
+          a.attr("data-animal", topics[i]);
+          // Providing the initial button text
+          a.text(topics[i]);
+          // Adding the button to the buttons-appear-here div
+          $("#buttons-appear-here").append(a);
+        }
+      }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       //occurs when the button in the form has been clicked
+       $("#add-show").on("click", function(event) {
+        event.preventDefault();
+        // This line grabs the input from the textbox
+        var topic = $("#ShowText").val().trim();
+        // Adding tv show from the textbox to our array
+        topics.push(topic);
+
+        // Calling renderButtons which handles the processing of our topics array
+        var t=$("<button>");
+        t.addClass("showy");
+        t.attr("data-animal",topic);
+        t.text(topic);
+        $("#buttons-appear-here").append(t);
+        
+      });
+//////Shows the info such as the rating of each gif for this specific tv show///////////////////////////////////////////////////////////////////
+      function DisplayMoreInfo()
+      {
+        var topico = $(this).attr("data-animal");
+        var queryURLer = "http://api.giphy.com/v1/gifs/search?q=" +
+        topico + "&api_key=dc6zaTOxFJmzC&limit=10";
+        $.ajax({
+          url: queryURLer,
+          method: "GET"
+        }).done(function(resp) {
+          console.log(resp);
+          var laresults=resp.data;
+          console.log(resp.data);
+          for (var i = 0; i < laresults.length; i++) {
+            var laDiv=$("<div>");
+            var p=$("<p>").text("Rating: "+laresults[i].rating);
+            var laImage=$("<img>");
+            //laImage.addClass("new-im");
+            laImage.attr("src",laresults[i].images.fixed_height_still.url);
+            laImage.attr("data-still",laresults[i].images.fixed_height_still.url);
+            laImage.attr("data-animate",laresults[i].images.fixed_height.url);
+            laImage.attr("data-state","still");
+            laImage.addClass("new-im");
+            laDiv.append(p);
+            laDiv.append(laImage);  
+            $("#gifs-appear-here").prepend(laDiv);
+          }
+        });
+      }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // Adding a click event listener to all elements with a class of "showy" and also invoking the DisplayMoreInfo function
+      $(document).on("click", ".showy", DisplayMoreInfo);
+
+      //function for animating and pausing the giffy images
+      $(document).on("click", ".new-im", function(){
+          var hey1 = $(this).attr("data-state"); //stores the 
+          var state = $(this).attr("src");
+          // If the clicked image's state is still, update its src attribute to what its data-animate value is.
+          // Then, set the image's data-state to animate
+          // Else set src to the data-still value
+          if (hey1 === "still") 
+          {
+            $(this).attr("src", $(this).attr("data-animate"));
+            $(this).attr("data-state", "animate");
+          }
+          else 
+          {
+            $(this).attr("src",$(this).attr("data-still"));
+            $(this).attr("data-state","still");
+          }
+
+      });
+  </script>
+</body>
+</html>
